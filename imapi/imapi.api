@@ -1,0 +1,21 @@
+syntax = "v1"
+
+type (
+	SendMsgRequest {
+		ToUserId int64  `json:"toUserId"`
+		Content  string `json:"content"`
+	}
+	SendMsgResponse {
+		Id         int64  `json:"id"`
+		CreateTime int64  `json:"createTime"`
+		Content    string `json:"content"`
+	}
+)
+
+@server (
+	prefix: /v1/imapi
+)
+service imapi-api {
+	@handler SendMsgHandler
+	post /send/msg (SendMsgRequest) returns (SendMsgResponse)
+}
