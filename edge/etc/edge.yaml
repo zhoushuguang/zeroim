@@ -1,0 +1,21 @@
+Name: edge_01
+TCPListenOn: 0.0.0.0:9898
+SendChanSize: 1024
+Etcd:
+  Hosts:
+    - 127.0.0.1:2379
+  Key: "edge_01"  
+KqConf:
+  Name: edge_01
+  Brokers:
+    - 127.0.1:9092
+  Group: group-edge-01
+  Topic: topic-edge-01
+  Offset: last
+  Consumers: 1
+  Processors: 1
+IMRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: imrpc.rpc
