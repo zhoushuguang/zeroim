@@ -3,10 +3,11 @@ package handler
 import (
 	"net/http"
 
-	"github.com/zeromicro/go-zero/rest/httpx"
 	"github.com/zhoushuguang/zeroim/imapi/internal/logic"
 	"github.com/zhoushuguang/zeroim/imapi/internal/svc"
 	"github.com/zhoushuguang/zeroim/imapi/internal/types"
+
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func ImapiHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
