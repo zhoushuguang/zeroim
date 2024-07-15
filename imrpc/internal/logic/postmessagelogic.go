@@ -2,9 +2,9 @@ package logic
 
 import (
 	"context"
-	"zeroim/common/session"
-	"zeroim/imrpc/imrpc"
-	"zeroim/imrpc/internal/svc"
+	"github.com/zhoushuguang/zeroim/common/session"
+	"github.com/zhoushuguang/zeroim/imrpc/imrpc"
+	"github.com/zhoushuguang/zeroim/imrpc/internal/svc"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/zeromicro/go-zero/core/collection"

@@ -6,9 +6,9 @@ package server
 import (
 	"context"
 
-	"zeroim/imrpc/imrpc"
-	"zeroim/imrpc/internal/logic"
-	"zeroim/imrpc/internal/svc"
+	"github.com/zhoushuguang/zeroim/imrpc/imrpc"
+	"github.com/zhoushuguang/zeroim/imrpc/internal/logic"
+	"github.com/zhoushuguang/zeroim/imrpc/internal/svc"
 )
 
 type ImrpcServer struct {
