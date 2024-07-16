@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"zeroim/imapi/internal/svc"
-	"zeroim/imapi/internal/types"
-	"zeroim/imrpc/imrpc"
+	"github.com/zhoushuguang/zeroim/imapi/internal/svc"
+	"github.com/zhoushuguang/zeroim/imapi/internal/types"
+	"github.com/zhoushuguang/zeroim/imrpc/imrpc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

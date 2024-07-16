@@ -3,10 +3,11 @@ package handler
 import (
 	"net/http"
 
+	"github.com/zhoushuguang/zeroim/imapi/internal/logic"
+	"github.com/zhoushuguang/zeroim/imapi/internal/svc"
+	"github.com/zhoushuguang/zeroim/imapi/internal/types"
+
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"zeroim/imapi/internal/logic"
-	"zeroim/imapi/internal/svc"
-	"zeroim/imapi/internal/types"
 )
 
 func SendMsgHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
