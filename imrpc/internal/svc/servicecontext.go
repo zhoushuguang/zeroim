@@ -27,7 +27,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	// 第一次初始化
 	queueList := GetQueueList(c.QueueEtcd)
 	threading.GoSafe(func() {
-		go discovery.QueueDiscoveryProc(c.QueueEtcd, queueList)
+		discovery.QueueDiscoveryProc(c.QueueEtcd, queueList)
 	})
 	rds, err := redis.NewRedis(redis.RedisConf{
 		Host: c.BizRedis.Host,
