@@ -1,5 +1,6 @@
 Name: edge_01
 TCPListenOn: 0.0.0.0:9898
+WSListenOn: 0.0.0.0:443
 SendChanSize: 1024
 Etcd:
   Hosts:

@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Name         string
 	TCPListenOn  string
+	WSListenOn   string
 	SendChanSize int
 	IMRpc        zrpc.RpcClientConf
 	KqConf       kq.KqConf

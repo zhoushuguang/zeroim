@@ -4,10 +4,10 @@ import (
 	"flag"
 	"fmt"
 
-	"zeroim/imrpc/imrpc"
-	"zeroim/imrpc/internal/config"
-	"zeroim/imrpc/internal/server"
-	"zeroim/imrpc/internal/svc"
+	"github.com/zhoushuguang/zeroim/imrpc/imrpc"
+	"github.com/zhoushuguang/zeroim/imrpc/internal/config"
+	"github.com/zhoushuguang/zeroim/imrpc/internal/server"
+	"github.com/zhoushuguang/zeroim/imrpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"

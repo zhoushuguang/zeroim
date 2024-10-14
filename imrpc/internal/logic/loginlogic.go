@@ -2,10 +2,11 @@ package logic
 
 import (
 	"context"
+	"fmt"
 	"time"
 
-	"zeroim/imrpc/imrpc"
-	"zeroim/imrpc/internal/svc"
+	"github.com/zhoushuguang/zeroim/imrpc/imrpc"
+	"github.com/zhoushuguang/zeroim/imrpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -31,6 +32,10 @@ func (l *LoginLogic) Login(in *imrpc.LoginRequest) (*imrpc.LoginResponse, error)
 	//	logx.Errorf("[Login] jwt verify token req: %+v error: %v", in, err)
 	//	return nil, err
 	//}
+
+	fmt.Println("1111111111111111111")
+	fmt.Printf("in: %+v\n", in)
+
 	_, err := l.svcCtx.BizRedis.Zadd(in.Token, time.Now().UnixMilli(), in.SessionId)
 	if err != nil {
 		logx.Errorf("[Login] Zadd token: %s sessionId: %s  error: %v", in.Token, in.SessionId, err)
