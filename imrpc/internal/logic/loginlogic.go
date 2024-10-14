@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"zeroim/imrpc/imrpc"
-	"zeroim/imrpc/internal/svc"
+	"github.com/zhoushuguang/zeroim/imrpc/imrpc"
+	"github.com/zhoushuguang/zeroim/imrpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

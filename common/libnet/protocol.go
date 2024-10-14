@@ -7,6 +7,8 @@ import (
 	"io"
 	"net"
 	"time"
+
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 const maxBodySize = 1 << 12
@@ -31,7 +33,7 @@ header头长度=1+1+2+2+4
 
 const (
 	packSize      = 4
-	headerSize    = 4
+	headerSize    = 2
 	verSize       = 1
 	statusSize    = 1
 	serviceIdSize = 2
@@ -50,8 +52,8 @@ const (
 )
 
 var (
-	ErrRawPackLen   = errors.New("")
-	ErrRawHeaderLen = errors.New("")
+	ErrRawPackLen   = errors.New("default server codec pack length error")
+	ErrRawHeaderLen = errors.New("default server codec header length error")
 )
 
 type Header struct {
@@ -125,29 +127,35 @@ func (c *imCodec) Receive() (*Message, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if packLen > maxPackSize {
 		return nil, ErrRawPackLen
 	}
+
 	buf, err := c.readPacket(packLen)
 	if err != nil {
 		return nil, err
 	}
 
-	msg := &Message{}
+	var msg Message
+	headerLen := binary.BigEndian.Uint16(buf[headerOffset:verOffset])
 	msg.Version = buf[verOffset]
 	msg.Status = buf[statusOffset]
 	msg.ServiceId = binary.BigEndian.Uint16(buf[serviceIdOffset:cmdOffset])
 	msg.Cmd = binary.BigEndian.Uint16(buf[cmdOffset:seqOffset])
 	msg.Seq = binary.BigEndian.Uint32(buf[seqOffset:bodyOffset])
+	//logx.Infof("msg.Seq:%+v", msg.Seq)
 
-	headerLen := binary.BigEndian.Uint16(buf[headerOffset:verOffset])
 	if headerLen != rawHeaderSize {
 		return nil, ErrRawHeaderLen
 	}
+
 	if packLen > uint32(headerLen) {
 		msg.Body = buf[bodyOffset:packLen]
 	}
-	return msg, nil
+
+	logx.Infof("receive msg:%+v", msg)
+	return &msg, nil
 }
 
 func (c *imCodec) Send(msg Message) error {

@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"zeroim/common/discovery"
-	"zeroim/imrpc/internal/config"
+	"github.com/zhoushuguang/zeroim/common/discovery"
+	"github.com/zhoushuguang/zeroim/imrpc/internal/config"
 
 	"github.com/zeromicro/go-queue/kq"
 	"github.com/zeromicro/go-zero/core/discov"

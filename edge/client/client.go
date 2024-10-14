@@ -7,8 +7,8 @@ import (
 	"github.com/zhoushuguang/zeroim/common/libnet"
 	"github.com/zhoushuguang/zeroim/imrpc/imrpcclient"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/zeromicro/go-zero/core/logx"
-	"google.golang.org/protobuf/proto"
 )
 
 type Client struct {
@@ -44,15 +44,21 @@ func (c *Client) Login(msg *libnet.Message) error {
 	if err != nil {
 		msg.Status = 1
 		msg.Body = []byte(err.Error())
-		c.Send(*msg)
+		e := c.Send(*msg)
+		if e != nil {
+			logx.Errorf("[Login] client.Send error: %v", e)
+		}
 		return err
 	}
 
 	msg.Status = 0
-	msg.Body = []byte("login success")
-	c.Send(*msg)
+	msg.Body = []byte("登录成功")
+	err = c.Send(*msg)
+	if err != nil {
+		logx.Errorf("[Login] client.Send error: %v", err)
+	}
 
-	return nil
+	return err
 }
 
 func (c *Client) Receive() (*libnet.Message, error) {
@@ -92,22 +98,28 @@ func (c *Client) HeartBeat() error {
 			c.Send(*heaetbeat)
 			break
 		case <-timer.C:
-
 		}
 	}
 }
 
 func makeLoginMessage(msg *libnet.Message) (*imrpcclient.LoginRequest, error) {
-	var loginReq imrpcclient.LoginRequest
-	err := proto.Unmarshal(msg.Body, &loginReq)
+	// 登录功能还没做
+	// 这里临时处理，先把PostMsg中的Msg转换成LoginRequest中的Token和Authorization用于登录处理
+	var postMsg imrpcclient.PostMsg
+	err := proto.Unmarshal(msg.Body, &postMsg)
 	if err != nil {
 		return nil, err
 	}
+	loginReq := imrpcclient.LoginRequest{
+		Token:         postMsg.Msg,
+		Authorization: postMsg.Msg,
+	}
+
 	return &loginReq, nil
 }
 
-func makePostMessage(sessionId string, msg *libnet.Message) *imrpcclient.PostMessageRequest {
-	var postMessageReq imrpcclient.PostMessageRequest
+func makePostMessage(sessionId string, msg *libnet.Message) *imrpcclient.PostMsg {
+	var postMessageReq imrpcclient.PostMsg
 	err := proto.Unmarshal(msg.Body, &postMessageReq)
 	if err != nil {
 		logx.Errorf("[makePostMessage] proto.Unmarshal msg: %v error: %v", msg, err)
@@ -117,8 +129,8 @@ func makePostMessage(sessionId string, msg *libnet.Message) *imrpcclient.PostMes
 	postMessageReq.Status = uint32(msg.Status)
 	postMessageReq.ServiceId = uint32(msg.ServiceId)
 	postMessageReq.Cmd = uint32(msg.Cmd)
-	postMessageReq.Seq = uint32(msg.Seq)
+	postMessageReq.Seq = msg.Seq
 	postMessageReq.SessionId = sessionId
-	postMessageReq.Body = msg.Body
+
 	return &postMessageReq
 }

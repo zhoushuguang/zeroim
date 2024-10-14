@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Websocket Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 600px;
+            height: 500px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .connection-buttons {
+            /*display: flex;*/
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        input[type="text"] {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            width: 400px;
+        }
+
+        .message {
+            margin-bottom: 5px;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 70%;
+            word-wrap: break-word;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .sent-message {
+            background-color: #d9edf7;
+            color: #31708f;
+            justify-content: flex-end;
+            margin-left: auto;
+        }
+
+        .received-message {
+            background-color: #f2dede;
+            color: #a94442;
+            justify-content: flex-start;
+            margin-right: auto;
+        }
+
+        .input-section {
+            display: flex;
+            align-items: center;
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+<div class="chat-container">
+    <div class="connection-buttons">
+        <button onclick="connect()">连接</button>
+        <button onclick="disconnect()">断开</button>
+    </div>
+    <h1>对话</h1>
+    <div id="messages"></div>
+    <div class="input-section">
+        <input id="message" type="text" placeholder="">
+        <button onclick="send()">Send</button>
+    </div>
+</div>
+
+<script src="bundle.js"></script>
+<script type="text/javascript">
+    (function (root) {
+        'use strict';
+
+        function isValidArray(x) {
+            return /Int(8|16|32)Array|Uint(8|8Clamped|16|32)Array|Float(32|64)Array|ArrayBuffer/gi.test({}.toString.call(x));
+        }
+
+        function arrayBufferConcat(/* arraybuffers */) {
+            var arrays = [].slice.call(arguments);
+
+            if (arrays.length <= 0 ||!isValidArray(arrays[0])) {
+                return new Uint8Array(0).buffer;
+            }
+
+            var arrayBuffer = arrays.reduce(function (cbuf, buf, i) {
+                if (i === 0) return cbuf;
+                if (!isValidArray(buf)) return cbuf;
+
+                var tmp = new Uint8Array(cbuf.byteLength + buf.byteLength);
+                tmp.set(new Uint8Array(cbuf), 0);
+                tmp.set(new Uint8Array(buf), cbuf.byteLength);
+
+                return tmp.buffer;
+            }, arrays[0]);
+
+            return arrayBuffer;
+        }
+        root.arrayBufferConcat = arrayBufferConcat;
+    })(window);
+
+    const maxBodySize = 1 << 12;
+    // size
+    const _packSize = 4;
+    const _headerSize = 2;
+    const _verSize = 1;
+    const _statusSize = 1;
+    const _serviceIdSize = 2;
+    const _cmdSize = 2;
+    const _seqSize = 4;
+    const _rawHeaderSize = _verSize + _statusSize + _serviceIdSize + _cmdSize + _seqSize;
+    const _maxPackSize = maxBodySize + _rawHeaderSize + _headerSize + _packSize;
+    // offset
+    const _headerOffset = 0;
+    const _verOffset = _headerOffset + _headerSize;
+    const _statusOffset = _verOffset + _verSize;
+    const _serviceIdOffset = _statusOffset + _statusSize;
+    const _cmdOffset = _serviceIdOffset + _serviceIdSize;
+    const _seqOffset = _cmdOffset + _cmdSize;
+    const _bodyOffset = _seqOffset + _seqSize;
+
+    let sock = null;
+
+    function connect() {
+        let url = "ws://localhost:443/ws";
+        console.log("url: " + url);
+        sock = new WebSocket(url);
+        sock.binaryType = "arraybuffer";
+        sock.onopen = function () {
+            console.log("connected to " + url);
+            displayMessage("连接成功.", 'received-message');
+        };
+        sock.onmessage = function (e) {
+            console.log(e);
+            console.log('receive->', e.data);
+            const msg = translate(e.data);
+            console.log('receive msg:');
+            console.log(msg);
+            displayMessage(msg.body, 'received-message');
+        };
+        sock.onclose = function (e) {
+            console.log("connection: " + url + " closed(" + e.code + ")");
+            displayMessage("Disconnected from server.", 'received-message');
+        };
+    }
+
+    function disconnect() {
+        sock.close();
+        displayMessage("Connection closed.", 'received-message');
+    }
+
+    function send() {
+        let message = document.getElementById('message').value;
+        let body = makeBody(message);
+        console.log('body:' + body);
+        console.log('body len:' + body.length);
+        let msg = new Message(0, 0, 0, 0, 12, body);
+        Send(msg);
+        displayMessage(message, 'sent-message');
+        document.getElementById('message').value = '';
+    }
+
+    function Message(version, status, serviceId, cmd, seq, body) {
+        this.version = version;
+        this.status = status;
+        this.serviceId = serviceId;
+        this.cmd = cmd;
+        this.seq = seq;
+        this.body = body;
+    }
+
+    function Send(msg) {
+        console.log('send msg:');
+        console.log(msg);
+        let buffer = new ArrayBuffer(_rawHeaderSize + _headerSize + _packSize);
+        let dataView = new DataView(buffer);
+        dataView.setUint32(0, msg.body.length + _rawHeaderSize + _headerSize);
+        dataView.setUint16(4, _rawHeaderSize);
+        dataView.setUint8(6, msg.version);
+        dataView.setUint8(7, msg.status);
+        dataView.setUint16(8, msg.serviceId);
+        dataView.setUint16(10, msg.cmd);
+        dataView.setUint32(12, msg.seq);
+
+        let allbuffer = arrayBufferConcat(buffer, msg.body);
+        sock.send(allbuffer);
+    }
+
+    function translate(data) {
+        let dataView = new DataView(data);
+        const msg = new Message();
+        msg.version = dataView.getUint16(6);
+        msg.status = dataView.getUint8(8);
+        msg.serviceId = dataView.getUint8(9);
+        msg.cmd = dataView.getUint16(10);
+        msg.seq = dataView.getUint32(12);
+
+        const bodyLength = data.byteLength - (_rawHeaderSize + _headerSize);
+        const bodyStart = _rawHeaderSize + _headerSize;
+        const bodyBuffer = data.slice(bodyStart, bodyStart + bodyLength);
+        const bodyDataView = new DataView(bodyBuffer);
+        const decoder = new TextDecoder();
+        msg.body = decoder.decode(bodyDataView);
+
+        return msg;
+    }
+
+    function makeBody(message) {
+        let pb = new proto.imrpc.PostMsg();
+        pb.setMsg(message);
+        return pb.serializeBinary();
+    }
+
+    function displayMessage(message, className) {
+        const messagesDiv = document.getElementById('messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', className);
+        const messageSpan = document.createElement('span');
+        messageSpan.textContent = message;
+        messageDiv.appendChild(messageSpan);
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+</script>
+</body>
+
+</html>

@@ -7,7 +7,7 @@ option go_package="./imrpc";
 service Imrpc {
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc Logout(LogoutRequest) returns (LogoutResponse);
-  rpc PostMessage(PostMessageRequest) returns (PostMessageReponse);
+  rpc PostMessage(PostMsg) returns (PostReponse);
 }
 
 message LoginRequest {
@@ -29,7 +29,7 @@ message LogoutResponse {
     bytes body = 1;
 }
 
-message PostMessageRequest {
+message PostMsg {
   uint32 Version = 1;
   uint32 Status = 2;
   uint32 ServiceId = 3;
@@ -39,10 +39,10 @@ message PostMessageRequest {
   string ToToken = 7;
   string SessionId = 8;
   int64 Timestamp = 9;
-  bytes Body = 10;
+  string Msg = 10; // 消息内容
 }
 
-message PostMessageReponse {
+message PostReponse {
   uint32 code = 1;
   string desc = 2;
   bytes data = 3;

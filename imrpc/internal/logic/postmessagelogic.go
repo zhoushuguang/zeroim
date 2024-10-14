@@ -2,9 +2,9 @@ package logic
 
 import (
 	"context"
-	"zeroim/common/session"
-	"zeroim/imrpc/imrpc"
-	"zeroim/imrpc/internal/svc"
+	"github.com/zhoushuguang/zeroim/common/session"
+	"github.com/zhoushuguang/zeroim/imrpc/imrpc"
+	"github.com/zhoushuguang/zeroim/imrpc/internal/svc"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/zeromicro/go-zero/core/collection"
@@ -25,7 +25,7 @@ func NewPostMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PostM
 	}
 }
 
-func (l *PostMessageLogic) PostMessage(in *imrpc.PostMessageRequest) (*imrpc.PostMessageReponse, error) {
+func (l *PostMessageLogic) PostMessage(in *imrpc.PostMsg) (*imrpc.PostReponse, error) {
 	var (
 		allDevice bool
 		name      string
@@ -45,6 +45,9 @@ func (l *PostMessageLogic) PostMessage(in *imrpc.PostMessageRequest) (*imrpc.Pos
 	if len(sessionIds) == 0 {
 		return nil, err
 	}
+
+	//TODO 此处编辑用户输入的信息，然后返回给客户端
+	in.Msg = "feedback: " + in.Msg
 	data, err := proto.Marshal(in)
 	if err != nil {
 		return nil, err
@@ -87,5 +90,5 @@ func (l *PostMessageLogic) PostMessage(in *imrpc.PostMessageRequest) (*imrpc.Pos
 		}
 	}
 
-	return &imrpc.PostMessageReponse{}, nil
+	return &imrpc.PostReponse{}, nil
 }

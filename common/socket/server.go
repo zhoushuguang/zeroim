@@ -2,11 +2,12 @@ package socket
 
 import (
 	"crypto/tls"
+	"errors"
 	"io"
 	"net"
 	"strings"
 	"time"
-	
+
 	"github.com/zhoushuguang/zeroim/common/libnet"
 )
 
@@ -33,14 +34,15 @@ func (s *Server) Accept() (*libnet.Session, error) {
 	for {
 		conn, err := s.Listener.Accept()
 		if err != nil {
-			if ne, err := err.(net.Error); err && ne.Timeout() {
+			var ne net.Error
+			if errors.As(err, &ne) && ne.Timeout() {
 				if tempDelay == 0 {
 					tempDelay = 5 * time.Millisecond
 				} else {
 					tempDelay *= 2
 				}
-				if max := 1 * time.Second; tempDelay > max {
-					tempDelay = max
+				if maxDelay := 1 * time.Second; tempDelay > maxDelay {
+					tempDelay = maxDelay
 				}
 				time.Sleep(tempDelay)
 				continue

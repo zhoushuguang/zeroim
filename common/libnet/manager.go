@@ -77,7 +77,6 @@ func (m *Manager) AddSession(session *Session) {
 }
 
 func (m *Manager) removeSession(session *Session) {
-
 }
 
 func (m *Manager) Close() {
